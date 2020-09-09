@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/radio_group_ft_orient"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:padding="12dp">
+
+        <RadioButton
+            android:id="@+id/rb_orient_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ft_op_0" />
+
+        <RadioButton
+            android:id="@+id/rb_orient_90"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ft_op_90" />
+
+        <RadioButton
+            android:id="@+id/rb_orient_180"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ft_op_180" />
+
+        <RadioButton
+            android:id="@+id/rb_orient_270"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ft_op_270" />
+
+        <RadioButton
+            android:id="@+id/rb_orient_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ft_op_all" />
+    </RadioGroup>
+
+    <ImageView
+        android:id="@+id/iv_close"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="6dp"
+        android:src="@drawable/ic_close" />
+</LinearLayout>

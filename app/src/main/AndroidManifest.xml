@@ -16,6 +16,7 @@
     <uses-permission android:name="android.hardware.camera" />
 
     <application
+        android:name=".main.ZhumuApplication"
         android:allowBackup="false"
         android:icon="@mipmap/icon_app"
         android:label="@string/app_name"
@@ -23,14 +24,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".mian.compare.MainActivity">
+        <activity android:name=".main.compare.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".mian.setting.SettingActivity" />
+        <activity android:name=".main.setting.SettingActivity" />
     </application>
 
 </manifest>

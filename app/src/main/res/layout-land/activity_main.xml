@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".mian.compare.MainActivity">
+    tools:context=".main.compare.MainActivity">
 
     <com.youth.banner.Banner
         android:id="@+id/banner_adv"

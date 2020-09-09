@@ -8,13 +8,11 @@ import android.util.Log;
 import com.cshtface.sdk.FaceTools;
 import com.cshtface.sdk.bean.msg;
 import com.example.zhumuapplication.common.Constants;
-import com.example.zhumuapplication.mian.ZhumuApplication;
+import com.example.zhumuapplication.main.ZhumuApplication;
 
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 
 import static com.cshtface.common.Constants.IMG_ANGLE_0;
@@ -54,6 +52,7 @@ public class BaseCompareUtil {
                 @Override
                 public void run() {
                     faceToolInit(cb);
+
                 }
             });
         }
@@ -66,7 +65,6 @@ public class BaseCompareUtil {
 
     private void faceToolInit(final CallBack cb) {
         if (faceTools == null) {
-            cb.onInitStart();
             faceTools = new FaceTools();
             faceTools.setModelPath(Constants.ZHUMU_MODEL_FILE_DIRECTORY);
             boolean isInitHandle = faceTools.initAllTools(30, 700);
@@ -78,7 +76,6 @@ public class BaseCompareUtil {
                 cb.onInitSuccess();
             } else {
                 isInit = false;
-                cb.onInitFail();
                 Log.e("zxb", "run->  faceTool  ：初始化失败");
                 faceTools = null;
                 SystemClock.sleep(5000);
@@ -210,12 +207,6 @@ public class BaseCompareUtil {
             faceTools.destroy();
         }
     }
-
-
-
-
-
-
 
 
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".mian.compare.MainActivity">
+    tools:context=".main.compare.MainActivity">
 
     <com.youth.banner.Banner
         android:id="@+id/banner_adv"
@@ -19,12 +19,29 @@
         android:layout_weight="0.4"
         android:orientation="horizontal">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextureView
+                android:id="@+id/single_camera_texture_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.example.zhumuapplication.view.FaceRectView
+                android:id="@+id/single_camera_face_rect_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+
+        </FrameLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            >
+            android:visibility="gone">
 
             <com.example.zhumuapplication.view.CameraView
                 android:id="@+id/cameraview"
@@ -40,12 +57,6 @@
                 android:layout_centerInParent="true"
                 android:visibility="visible" />
 
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_name"
-                android:textSize="16sp" />
         </RelativeLayout>
 
         <View
@@ -59,36 +70,51 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/bg_compare"
-
             android:orientation="horizontal">
+
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="vertical">
 
-
-                <TextClock
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:format12Hour="hh:mm"
-                    android:gravity="center"
-                    android:textColor="#ea0c4f"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextClock
-                    android:layout_marginTop="20dp"
-                    android:id="@+id/tc_clock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:format12Hour="yyyy年MM月dd日"
-                    android:gravity="center"
-                    android:textColor="#ea0c4f"
+                    android:text="@string/title_name"
+                    android:textColor="#efefef"
                     android:textSize="16sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextClock
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:format12Hour="hh:mm"
+                        android:gravity="center"
+                        android:textColor="#ea0c4f"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextClock
+                        android:id="@+id/tc_clock"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="sans-serif-light"
+                        android:format12Hour="yyyy年MM月dd日"
+                        android:gravity="center"
+                        android:textColor="#ea0c4f"
+                        android:textSize="16sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -101,7 +127,9 @@
                 <com.example.zhumuapplication.view.ImageViewRoundOval
                     android:id="@+id/iv_head"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.7"
+                    android:scaleType="fitCenter"
                     android:src="@mipmap/ic_launcher" />
 
                 <TextView
@@ -110,7 +138,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="asdfasdf"
-                    android:textSize="16sp" />
+                    android:textSize="18sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
