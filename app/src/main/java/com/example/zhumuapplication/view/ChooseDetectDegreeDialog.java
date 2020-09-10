@@ -1,4 +1,4 @@
-package com.example.zhumuapplication.main.setting;
+package com.example.zhumuapplication.view;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;

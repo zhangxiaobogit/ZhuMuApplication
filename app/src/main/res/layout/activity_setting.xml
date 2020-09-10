@@ -73,6 +73,11 @@
             style="@style/Setting_Text_Click"
             android:text="比对阈值设置" />
 
+        <TextView
+            android:id="@+id/tv_face_manger"
+            style="@style/Setting_Text_Click"
+            android:text="图像检测角度" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

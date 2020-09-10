@@ -32,6 +32,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".main.setting.SettingActivity" />
+        <activity android:name=".main.setting.FaceManageActivity" />
+
     </application>
 
 </manifest>

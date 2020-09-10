@@ -2,6 +2,7 @@ package com.example.zhumuapplication.main.setting;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -12,12 +13,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zhumuapplication.R;
-import com.example.zhumuapplication.main.BaseActivity;
 import com.example.zhumuapplication.util.SettingUtils;
+import com.example.zhumuapplication.view.ChooseDetectDegreeDialog;
 
-public class SettingActivity extends BaseActivity {
+public class SettingActivity extends AppCompatActivity {
     private Switch sw_change_cameraid;
     private Switch sw_check_alive;
 
@@ -65,7 +67,12 @@ public class SettingActivity extends BaseActivity {
                 SettingUtils.setLivenewssDetect(isChecked);
             }
         });
-
+        findViewById(R.id.tv_face_manger).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingActivity.this, FaceManageActivity.class));
+            }
+        });
     }
 
     // 修改配置项的对话框
@@ -107,4 +114,5 @@ public class SettingActivity extends BaseActivity {
                         }).setNegativeButton("取消", null).create().show();
 
     }
+
 }
