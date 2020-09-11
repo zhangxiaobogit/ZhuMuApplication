@@ -16,7 +16,7 @@ public class Constants {
      * 识别阈值
      */
     public static final float SIMILAR_THRESHOLD = 0.8F;
-    public static final int MAX_DETECT_NUM = 10;
+    public static final int MAX_DETECT_NUM = 1;
     /**
      * 出错重试最大次数
      */

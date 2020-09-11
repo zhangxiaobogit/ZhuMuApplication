@@ -40,6 +40,7 @@ import com.example.zhumuapplication.view.FaceRectView;
 import com.example.zhumuapplication.view.ImageViewRoundOval;
 import com.youth.banner.Banner;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -56,6 +57,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
      */
     private FaceRectView faceRectView;
     private CompareModel compareModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,9 +72,6 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
             mainExecutors = Executors.newCachedThreadPool();
         }
     }
-
-
-
 
     public void initView() {
 //        initCameraView((CameraView) findViewById(R.id.cameraview), (FaceOverlayViews) findViewById(R.id.face_overlay_view), this);
@@ -234,6 +233,11 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
 
     private static final int ACTION_REQUEST_PERMISSIONS = 0x001;
 
@@ -244,7 +248,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
             ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
         } else {
             compareModel.initEngine(this);
-//            compareModel.initCamera();
+            compareModel.initCamera(this, faceRectView, previewView);
         }
     }
 
@@ -254,10 +258,16 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
             if (isAllGranted) {
                 compareModel.initEngine(this);
-//                compareModel.initCamera();
+                compareModel.initCamera(this, faceRectView, previewView);
             } else {
                 ZhumuToastUtil.showToast(getString(R.string.permission_denied));
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        compareModel.ARCRelese(this);
+        super.onDestroy();
     }
 }

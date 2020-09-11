@@ -3,6 +3,7 @@ package com.example.zhumuapplication.main.setting;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zhumuapplication.R;
 import com.example.zhumuapplication.util.SettingUtils;
+import com.example.zhumuapplication.util.ZhumuToastUtil;
 import com.example.zhumuapplication.view.ChooseDetectDegreeDialog;
 
 public class SettingActivity extends AppCompatActivity {
@@ -56,7 +58,11 @@ public class SettingActivity extends AppCompatActivity {
         sw_change_cameraid.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SettingUtils.setCameraId(isChecked ? 0 : 1);
+                if(Camera.getNumberOfCameras()>1) {
+                    SettingUtils.setCameraId(isChecked ? 0 : 1);
+                }else{
+                    ZhumuToastUtil.showToast("当前仅有一个摄像头，切换无效");
+                }
             }
         });
         sw_check_alive = findViewById(R.id.sw_check_alive);

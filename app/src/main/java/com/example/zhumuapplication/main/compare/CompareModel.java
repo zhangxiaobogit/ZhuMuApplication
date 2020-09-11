@@ -127,7 +127,7 @@ public class CompareModel {
 
     private DrawHelper drawHelper;
 
-    public void initCamera(final AppCompatActivity activity, final FaceRectView faceRectView, final ConcurrentHashMap<Integer, Integer> livenessMap, final View previewView) {
+    public void initCamera(final AppCompatActivity activity, final FaceRectView faceRectView, final View previewView) {
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -206,7 +206,7 @@ public class CompareModel {
                     }
                 }
             }
-
+            //活体检测结果回调
             @Override
             public void onFaceLivenessInfoGet(@Nullable LivenessInfo livenessInfo, final Integer requestId, Integer errorCode) {
                 if (livenessInfo != null) {
@@ -281,7 +281,6 @@ public class CompareModel {
                 if (facePreviewInfoList != null && faceRectView != null && drawHelper != null) {
                     drawPreviewInfo(facePreviewInfoList, faceRectView);
                 }
-                registerFace(nv21, facePreviewInfoList, activity);
                 clearLeftFace(facePreviewInfoList);
 
                 if (facePreviewInfoList != null && facePreviewInfoList.size() > 0 && previewSize != null) {
@@ -302,8 +301,7 @@ public class CompareModel {
                          * 对于每个人脸，若状态为空或者为失败，则请求特征提取（可根据需要添加其他判断以限制特征提取次数），
                          * 特征提取回传的人脸特征结果在{@link FaceListener#onFaceFeatureInfoGet(FaceFeature, Integer, Integer)}中回传
                          */
-                        if (status == null
-                                || status == RequestFeatureStatus.TO_RETRY) {
+                        if (status == null || status == RequestFeatureStatus.TO_RETRY) {
                             requestFeatureStatusMap.put(facePreviewInfoList.get(i).getTrackId(), RequestFeatureStatus.SEARCHING);
                             faceHelper.requestFaceFeature(nv21, facePreviewInfoList.get(i).getFaceInfo(), previewSize.width, previewSize.height, FaceEngine.CP_PAF_NV21, facePreviewInfoList.get(i).getTrackId());
 //                            Log.i("zxb", "onPreview: fr start = " + System.currentTimeMillis() + " trackId = " + facePreviewInfoList.get(i).getTrackedFaceCount());
@@ -331,7 +329,7 @@ public class CompareModel {
             }
         };
 
-        CameraHelper cameraHelper = new CameraHelper.Builder()
+        cameraHelper = new CameraHelper.Builder()
                 .previewViewSize(new Point(previewView.getMeasuredWidth(), previewView.getMeasuredHeight()))
                 .rotation(activity.getWindowManager().getDefaultDisplay().getRotation())
                 .specificCameraId(SettingUtils.getCameraId())
@@ -343,7 +341,9 @@ public class CompareModel {
         cameraHelper.start();
     }
 
-    public boolean switchCamera(CameraHelper cameraHelper) {
+    CameraHelper cameraHelper;
+
+    public boolean refreshCamera() {
         if (Camera.getNumberOfCameras() < 2) {
             return false;
         }
@@ -472,48 +472,6 @@ public class CompareModel {
      * 注册人脸状态码，注册中
      */
     private static final int REGISTER_STATUS_PROCESSING = 1;
-
-    private void registerFace(final byte[] nv21, final List<FacePreviewInfo> facePreviewInfoList, final AppCompatActivity activity) {
-        if (registerStatus == REGISTER_STATUS_READY && facePreviewInfoList != null && facePreviewInfoList.size() > 0) {
-            registerStatus = REGISTER_STATUS_PROCESSING;
-            Observable.create(new ObservableOnSubscribe<Boolean>() {
-                @Override
-                public void subscribe(ObservableEmitter<Boolean> emitter) {
-
-                    boolean success = FaceServer.getInstance().registerNv21(activity, nv21.clone(), previewSize.width, previewSize.height,
-                            facePreviewInfoList.get(0).getFaceInfo(), "registered " + faceHelper.getTrackedFaceCount());
-                    emitter.onNext(success);
-                }
-            })
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Boolean>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(Boolean success) {
-                            String result = success ? "register success!" : "register failed!";
-                            ZhumuToastUtil.showToast(result);
-                            registerStatus = REGISTER_STATUS_DONE;
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            e.printStackTrace();
-                            ZhumuToastUtil.showToast("register failed!");
-                            registerStatus = REGISTER_STATUS_DONE;
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        }
-    }
 
 
     /**
@@ -658,6 +616,51 @@ public class CompareModel {
             }
         }
 
+    }
 
+    public void ARCRelese(AppCompatActivity activity) {
+        if (cameraHelper != null) {
+            cameraHelper.release();
+            cameraHelper = null;
+        }
+
+        unInitEngine();
+        if (getFeatureDelayedDisposables != null) {
+            getFeatureDelayedDisposables.clear();
+        }
+        if (delayFaceTaskCompositeDisposable != null) {
+            delayFaceTaskCompositeDisposable.clear();
+        }
+        if (faceHelper != null) {
+            ConfigUtil.setTrackedFaceCount(activity, faceHelper.getTrackedFaceCount());
+            faceHelper.release();
+            faceHelper = null;
+        }
+
+        FaceServer.getInstance().unInit();
+    }
+
+    /**
+     * 销毁引擎，faceHelper中可能会有特征提取耗时操作仍在执行，加锁防止crash
+     */
+    private void unInitEngine() {
+        if (ftInitCode == ErrorInfo.MOK && ftEngine != null) {
+            synchronized (ftEngine) {
+                int ftUnInitCode = ftEngine.unInit();
+                Log.i(TAG, "unInitEngine: " + ftUnInitCode);
+            }
+        }
+        if (frInitCode == ErrorInfo.MOK && frEngine != null) {
+            synchronized (frEngine) {
+                int frUnInitCode = frEngine.unInit();
+                Log.i(TAG, "unInitEngine: " + frUnInitCode);
+            }
+        }
+        if (flInitCode == ErrorInfo.MOK && flEngine != null) {
+            synchronized (flEngine) {
+                int flUnInitCode = flEngine.unInit();
+                Log.i(TAG, "unInitEngine: " + flUnInitCode);
+            }
+        }
     }
 }
