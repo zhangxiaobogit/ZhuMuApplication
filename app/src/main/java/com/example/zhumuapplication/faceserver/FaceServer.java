@@ -458,6 +458,7 @@ public class FaceServer {
         for (int i = 0; i < faceRegisterInfoList.size(); i++) {
             tempFaceFeature.setFeatureData(faceRegisterInfoList.get(i).getFeatureData());
             faceEngine.compareFaceFeature(faceFeature, tempFaceFeature, faceSimilar);
+            Log.e("zxb", " 第   " + i + " 次比对    " + maxSimilar + "  最终角标    " + maxSimilarIndex);
             if (faceSimilar.getScore() > maxSimilar) {
                 maxSimilar = faceSimilar.getScore();
                 maxSimilarIndex = i;

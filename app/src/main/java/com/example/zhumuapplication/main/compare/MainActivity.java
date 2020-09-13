@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.bumptech.glide.Glide;
 import com.csht.ReadCardInit;
 import com.csht.common.listener.ReadCardListener;
 import com.csht.netty.entry.IdCard;
@@ -26,6 +27,7 @@ import com.csht.netty.entry.Info;
 import com.cshtface.sdk.bean.msg;
 import com.example.zhumuapplication.R;
 import com.example.zhumuapplication.common.Constants;
+import com.example.zhumuapplication.faceserver.CompareResult;
 import com.example.zhumuapplication.faceserver.FaceServer;
 import com.example.zhumuapplication.main.BaseActivity;
 import com.example.zhumuapplication.main.setting.SettingActivity;
@@ -40,17 +42,20 @@ import com.example.zhumuapplication.view.FaceRectView;
 import com.example.zhumuapplication.view.ImageViewRoundOval;
 import com.youth.banner.Banner;
 
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class MainActivity extends BaseActivity implements CameraView.OnCameraStateChangedListener, ViewTreeObserver.OnGlobalLayoutListener {
+public class MainActivity extends BaseActivity implements CameraView.OnCameraStateChangedListener, ViewTreeObserver.OnGlobalLayoutListener, GetResultCallback {
     private boolean isPushCard = false;
     private String idNum;
     private byte[] idHeadByte;
     private byte[] idCardFaces;
     public static ExecutorService mainExecutors;
     private View previewView;
+    private ImageView iv_head;
+    private TextView tv_name;
     /**
      * 绘制人脸框的控件
      */
@@ -77,7 +82,8 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
         previewView = findViewById(R.id.single_camera_texture_preview);
         //在布局结束后才做初始化操作
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);
-
+        iv_head = findViewById(R.id.iv_head);
+        tv_name = findViewById(R.id.tv_name);
         faceRectView = findViewById(R.id.single_camera_face_rect_view);
         ((ImageViewRoundOval) findViewById(R.id.iv_head)).setType(ImageViewRoundOval.TYPE_CIRCLE);
         ((TextClock) findViewById(R.id.tc_clock)).setFormat24Hour("yyyy年 MM月 dd日");
@@ -252,7 +258,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
             ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
         } else {
             compareModel.initEngine(this);
-            compareModel.initCamera(this, faceRectView, previewView);
+            compareModel.initCamera(this, faceRectView, previewView, this);
         }
     }
 
@@ -262,7 +268,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
         if (requestCode == ACTION_REQUEST_PERMISSIONS) {
             if (isAllGranted) {
                 compareModel.initEngine(this);
-                compareModel.initCamera(this, faceRectView, previewView);
+                compareModel.initCamera(this, faceRectView, previewView, this);
             } else {
                 ZhumuToastUtil.showToast(getString(R.string.permission_denied));
             }
@@ -273,5 +279,14 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     protected void onDestroy() {
         compareModel.ARCRelese(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void getCompareResultCall(CompareResult compareResult) {
+        File imgFile = new File(FaceServer.ROOT_PATH + File.separator + FaceServer.SAVE_IMG_DIR + File.separator + compareResult.getUserName() + FaceServer.IMG_SUFFIX);
+        Glide.with(iv_head)
+                .load(imgFile)
+                .into(iv_head);
+        tv_name.setText(compareResult.getUserName());
     }
 }

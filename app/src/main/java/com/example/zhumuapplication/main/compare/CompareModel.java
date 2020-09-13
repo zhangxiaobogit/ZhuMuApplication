@@ -127,7 +127,7 @@ public class CompareModel {
 
     private DrawHelper drawHelper;
 
-    public void initCamera(final AppCompatActivity activity, final FaceRectView faceRectView, final View previewView) {
+    public void initCamera(final AppCompatActivity activity, final FaceRectView faceRectView, final View previewView, final GetResultCallback getResultCallback) {
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -146,11 +146,11 @@ public class CompareModel {
                     Integer liveness = livenessMap.get(requestId);
                     //不做活体检测的情况，直接搜索
                     if (!SettingUtils.getLivenewssDetect()) {
-                        searchFace(faceFeature, requestId, activity);
+                        searchFace(faceFeature, requestId, activity, getResultCallback);
                     }
                     //活体检测通过，搜索特征
                     else if (liveness != null && liveness == LivenessInfo.ALIVE) {
-                        searchFace(faceFeature, requestId, activity);
+                        searchFace(faceFeature, requestId, activity, getResultCallback);
                     }
                     //活体检测未出结果，或者非活体，延迟执行该函数
                     else {
@@ -387,7 +387,7 @@ public class CompareModel {
      */
     private ConcurrentHashMap<Integer, Integer> requestFeatureStatusMap = new ConcurrentHashMap<>();
 
-    private void searchFace(final FaceFeature frFace, final Integer requestId, final AppCompatActivity activity) {
+    private void searchFace(final FaceFeature frFace, final Integer requestId, final AppCompatActivity activity, final GetResultCallback resultCallback) {
         Observable
                 .create(new ObservableOnSubscribe<CompareResult>() {
                     @Override
@@ -416,12 +416,12 @@ public class CompareModel {
                         }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                        Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore());
+                        Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getUserName());
                         if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
                             SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
                             requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
                             faceHelper.setName(requestId, activity.getString(R.string.recognize_success_notice, compareResult.getUserName()));
-
+                            resultCallback.getCompareResultCall(compareResult);
                         } else {
                             faceHelper.setName(requestId, activity.getString(R.string.recognize_failed_notice, "NOT_REGISTERED"));
                             retryRecognizeDelayed(requestId);
