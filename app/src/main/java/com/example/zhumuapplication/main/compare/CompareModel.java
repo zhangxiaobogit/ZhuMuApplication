@@ -29,6 +29,7 @@ import com.example.zhumuapplication.model.RequestLivenessStatus;
 import com.example.zhumuapplication.util.ConfigUtil;
 import com.example.zhumuapplication.util.DrawHelper;
 import com.example.zhumuapplication.util.SettingUtils;
+import com.example.zhumuapplication.util.SoundUtils;
 import com.example.zhumuapplication.util.ZhumuToastUtil;
 import com.example.zhumuapplication.util.camera.CameraHelper;
 import com.example.zhumuapplication.util.camera.CameraListener;
@@ -90,7 +91,6 @@ public class CompareModel {
     private Camera.Size previewSize;
     private ConcurrentHashMap<Integer, Integer> livenessErrorRetryMap = new ConcurrentHashMap<>();
 
-    private List<CompareResult> compareResultList;
     private FaceHelper faceHelper;
 
     public void initEngine(Context context) {
@@ -206,6 +206,7 @@ public class CompareModel {
                     }
                 }
             }
+
             //活体检测结果回调
             @Override
             public void onFaceLivenessInfoGet(@Nullable LivenessInfo livenessInfo, final Integer requestId, Integer errorCode) {
@@ -415,28 +416,9 @@ public class CompareModel {
                         }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                        if (((int) compareResult.getSimilar() * 100) > SettingUtils.getMoreCompareScore()) {
-                            boolean isAdded = false;
-                            if (compareResultList == null) {
-                                requestFeatureStatusMap.put(requestId, RequestFeatureStatus.FAILED);
-                                faceHelper.setName(requestId, "VISITOR " + requestId);
-                                return;
-                            }
-                            for (CompareResult compareResult1 : compareResultList) {
-                                if (compareResult1.getTrackId() == requestId) {
-                                    isAdded = true;
-                                    break;
-                                }
-                            }
-                            if (!isAdded) {
-                                //对于多人脸搜索，假如最大显示数量为 MAX_DETECT_NUM 且有新的人脸进入，则以队列的形式移除
-                                if (compareResultList.size() >= Constants.MAX_DETECT_NUM) {
-                                    compareResultList.remove(0);
-                                }
-                                //添加显示人员时，保存其trackId
-                                compareResult.setTrackId(requestId);
-                                compareResultList.add(compareResult);
-                            }
+                        Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore());
+                        if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
+                            SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
                             requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
                             faceHelper.setName(requestId, activity.getString(R.string.recognize_success_notice, compareResult.getUserName()));
 
@@ -444,6 +426,7 @@ public class CompareModel {
                             faceHelper.setName(requestId, activity.getString(R.string.recognize_failed_notice, "NOT_REGISTERED"));
                             retryRecognizeDelayed(requestId);
                         }
+
                     }
 
                     @Override
@@ -581,13 +564,6 @@ public class CompareModel {
      * @param facePreviewInfoList 人脸和trackId列表
      */
     private void clearLeftFace(List<FacePreviewInfo> facePreviewInfoList) {
-        if (compareResultList != null) {
-            for (int i = compareResultList.size() - 1; i >= 0; i--) {
-                if (!requestFeatureStatusMap.containsKey(compareResultList.get(i).getTrackId())) {
-                    compareResultList.remove(i);
-                }
-            }
-        }
         if (facePreviewInfoList == null || facePreviewInfoList.size() == 0) {
             requestFeatureStatusMap.clear();
             livenessMap.clear();
@@ -661,6 +637,18 @@ public class CompareModel {
                 int flUnInitCode = flEngine.unInit();
                 Log.i(TAG, "unInitEngine: " + flUnInitCode);
             }
+        }
+    }
+
+    public void cameraStart() {
+        if (cameraHelper != null) {
+            cameraHelper.start();
+        }
+    }
+
+    public void cameraStop() {
+        if (cameraHelper != null) {
+            cameraHelper.stop();
         }
     }
 }

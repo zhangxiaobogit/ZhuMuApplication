@@ -40,7 +40,6 @@ import com.example.zhumuapplication.view.FaceRectView;
 import com.example.zhumuapplication.view.ImageViewRoundOval;
 import com.youth.banner.Banner;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -225,7 +224,6 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
 
     @Override
     public void onFaceDismiss() {
-
     }
 
     @Override
@@ -234,9 +232,15 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        compareModel.cameraStart();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        finish();
+        compareModel.cameraStop();
     }
 
     private static final int ACTION_REQUEST_PERMISSIONS = 0x001;

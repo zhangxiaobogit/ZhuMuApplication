@@ -425,7 +425,7 @@ public class FaceServer {
                 break;
         }
         // 非0度的情况，旋转图像
-        if (rotateDegree != null){
+        if (rotateDegree != null) {
             rotateHeadImageData = new byte[headImageData.length];
             rotateCode = ArcSoftImageUtil.rotateImage(headImageData, rotateHeadImageData, cropRect.width(), cropRect.height(), rotateDegree, imageFormat);
             if (rotateCode != ArcSoftImageUtilError.CODE_SUCCESS) {
@@ -463,6 +463,7 @@ public class FaceServer {
                 maxSimilarIndex = i;
             }
         }
+        Log.e("zxb", " 比对最高分" + maxSimilar);
         isProcessing = false;
         if (maxSimilarIndex != -1) {
             return new CompareResult(faceRegisterInfoList.get(maxSimilarIndex).getName(), maxSimilar);

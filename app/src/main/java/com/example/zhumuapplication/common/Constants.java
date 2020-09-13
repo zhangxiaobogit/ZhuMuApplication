@@ -21,5 +21,15 @@ public class Constants {
      * 出错重试最大次数
      */
     public static final int MAX_RETRY_TIME = 3;
+    public static final int SOUNDPOOL_TYPE_SUCCESS = 1;//比对成功
+    public static final int SOUNDPOOL_TYPE_FAIL = 2;//比对失败
+    public static final int SOUNDPOOL_TYPE_DOOROPEN = 3;//门已开
+    public static final int SOUNDPOOL_TYPE_PLSE_PUSH_CARD = 4;//请刷身份证
+    public static final int SOUNDPOOL_TYPE_GET_CAR = 5;//车辆信息
+    public static final int SOUNDPOOL_TYPE_WARNBEEP = 6;//警告提示
+    public static final int SOUND_POOL_NOW_POWER = 7;//无权限人员
+    public static final int SOUNDPOOL_TYPE_PUSH_CARD_DI = 8;//刷卡滴声
+    public static final int SOUNDPOOL_TYPE_HOUSE_USER_CALL = 9;//业主呼叫声音
+    public static final int SOUNDPOOL_TYPE_BIBIBI = 10;//BIBIBI
 
 }
