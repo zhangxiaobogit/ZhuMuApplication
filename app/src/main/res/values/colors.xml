@@ -6,4 +6,9 @@
     <color name="bg_dark_gray">#888888</color>
     <color name="bg_compare">#333037</color>
     <color name="bg_line">#a5a0a0</color>
+
+
+    <color name="colorgreen">#14C893</color>
+
+
 </resources>
