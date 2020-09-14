@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <com.example.zhumuapplication.view.FaceRectView
+            <com.facecompare.zhumu.view.FaceRectView
                 android:id="@+id/single_camera_face_rect_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
@@ -43,14 +43,14 @@
             android:layout_weight="1"
             android:visibility="gone">
 
-            <com.example.zhumuapplication.view.CameraView
+            <com.facecompare.zhumu.view.CameraView
                 android:id="@+id/cameraview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true" />
 
 
-            <com.example.zhumuapplication.view.FaceOverlayViews
+            <com.facecompare.zhumu.view.FaceOverlayViews
                 android:id="@+id/face_overlay_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -124,7 +124,7 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <com.example.zhumuapplication.view.ImageViewRoundOval
+                <com.facecompare.zhumu.view.ImageViewRoundOval
                     android:id="@+id/iv_head"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"

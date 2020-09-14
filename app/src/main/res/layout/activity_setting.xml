@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.zhumuapplication.main.setting.SettingActivity">
+    tools:context="com.facecompare.zhumu.main.setting.SettingActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -76,6 +76,20 @@
 
         <View style="@style/Line_Style" />
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp">
+
+            <TextView
+                style="@style/Setting_Text_Title"
+                android:text="镜像翻转" />
+
+            <Switch
+                android:id="@+id/sw_set_mirror"
+                style="@style/Setting_Switch" />
+        </RelativeLayout>
+
+        <View style="@style/Line_Style" />
         <TextView
             android:id="@+id/tv_compare_score"
             style="@style/Setting_Text_Click"
