@@ -34,7 +34,7 @@ import java.util.concurrent.Executors;
 public class FaceManageActivity extends BaseActivity {
     //注册图所在的目录
     private static final String ROOT_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "zhumuface";
-    private static final String REGISTER_DIR = ROOT_DIR + File.separator + "register";
+    public static final String REGISTER_DIR = ROOT_DIR + File.separator + "register";
     private static final String REGISTER_FAILED_DIR = ROOT_DIR + File.separator + "failed";
     private ExecutorService executorService;
 

@@ -44,6 +44,6 @@ public class ConfigUtil {
             return DetectFaceOrientPriority.ASF_OP_270_ONLY;
         }
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE);
-        return DetectFaceOrientPriority.valueOf(sharedPreferences.getString(FT_ORIENT, DetectFaceOrientPriority.ASF_OP_270_ONLY.name()));
+        return DetectFaceOrientPriority.valueOf(sharedPreferences.getString(FT_ORIENT, DetectFaceOrientPriority.ASF_OP_0_ONLY.name()));
     }
 }

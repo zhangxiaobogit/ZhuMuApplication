@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -35,11 +36,11 @@ public class SettingActivity extends AppCompatActivity {
 
 
     @BindView(R.id.tv_check_angle)
-    Switch tv_check_angle;
+    TextView tv_check_angle;
     @BindView(R.id.tv_compare_score)
-    Switch tv_compare_score;
-    @BindView(R.id.btn_back)
-    Switch btn_back;
+    TextView tv_compare_score;
+    @BindView(R.id.iv_back)
+    ImageView iv_back;
 
 
 
@@ -66,7 +67,7 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-        btn_back.setOnClickListener(new View.OnClickListener() {
+        iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();

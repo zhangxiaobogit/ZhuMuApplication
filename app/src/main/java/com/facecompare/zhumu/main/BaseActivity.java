@@ -16,7 +16,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     public static final String[] NEEDED_PERMISSIONS = new String[]{
             Manifest.permission.CAMERA,
             Manifest.permission.READ_PHONE_STATE
-
     };
 
     @Override

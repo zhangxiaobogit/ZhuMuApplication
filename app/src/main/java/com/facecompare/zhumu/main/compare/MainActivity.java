@@ -30,6 +30,7 @@ import com.facecompare.zhumu.common.Constants;
 import com.facecompare.zhumu.faceserver.CompareResult;
 import com.facecompare.zhumu.faceserver.FaceServer;
 import com.facecompare.zhumu.main.BaseActivity;
+import com.facecompare.zhumu.main.setting.FaceManageActivity;
 import com.facecompare.zhumu.main.setting.SettingActivity;
 import com.facecompare.zhumu.util.AdBannerShow;
 import com.facecompare.zhumu.util.BaseCompareUtil;
@@ -283,7 +284,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
 
     @Override
     public void getCompareResultCall(CompareResult compareResult) {
-        File imgFile = new File(FaceServer.ROOT_PATH + File.separator + FaceServer.SAVE_IMG_DIR + File.separator + compareResult.getUserName() + FaceServer.IMG_SUFFIX);
+        File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getUserName() + FaceServer.IMG_SUFFIX);
         Glide.with(iv_head)
                 .load(imgFile)
                 .into(iv_head);

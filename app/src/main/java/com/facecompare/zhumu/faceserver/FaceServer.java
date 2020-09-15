@@ -16,10 +16,10 @@ import com.arcsoft.imageutil.ArcSoftImageFormat;
 import com.arcsoft.imageutil.ArcSoftImageUtil;
 import com.arcsoft.imageutil.ArcSoftImageUtilError;
 import com.arcsoft.imageutil.ArcSoftRotateDegree;
-import com.facecompare.zhumu.model.FaceRegisterInfo;
+import com.facecompare.zhumu.common.dbentity.Personnel;
+import com.facecompare.zhumu.db.DbManager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class FaceServer {
     public static final String IMG_SUFFIX = ".jpg";
     private static FaceEngine faceEngine = null;
     private static FaceServer faceServer = null;
-    private static List<FaceRegisterInfo> faceRegisterInfoList;
+    private static List<Personnel> faceRegisterInfoList;
     public static String ROOT_PATH;
     /**
      * 存放注册图的目录
@@ -107,29 +107,13 @@ public class FaceServer {
      * @param context 上下文对象
      */
     private void initFaceList(Context context) {
+        faceRegisterInfoList = new ArrayList<>();
         synchronized (this) {
-            if (ROOT_PATH == null) {
-                ROOT_PATH = context.getFilesDir().getAbsolutePath();
-            }
-            File featureDir = new File(ROOT_PATH + File.separator + SAVE_FEATURE_DIR);
-            if (!featureDir.exists() || !featureDir.isDirectory()) {
-                return;
-            }
-            File[] featureFiles = featureDir.listFiles();
-            if (featureFiles == null || featureFiles.length == 0) {
-                return;
-            }
-            faceRegisterInfoList = new ArrayList<>();
-            for (File featureFile : featureFiles) {
-                try {
-                    FileInputStream fis = new FileInputStream(featureFile);
-                    byte[] feature = new byte[FaceFeature.FEATURE_SIZE];
-                    fis.read(feature);
-                    fis.close();
-                    faceRegisterInfoList.add(new FaceRegisterInfo(feature, featureFile.getName()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+
+                faceRegisterInfoList.addAll(DbManager.getInstance().selectAllPersonnel());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -273,7 +257,7 @@ public class FaceServer {
                     if (faceRegisterInfoList == null) {
                         faceRegisterInfoList = new ArrayList<>();
                     }
-                    faceRegisterInfoList.add(new FaceRegisterInfo(faceFeature.getFeatureData(), userName));
+                    faceRegisterInfoList.add(new Personnel(faceFeature.getFeatureData(), userName));
                     return true;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -359,7 +343,8 @@ public class FaceServer {
                         if (faceRegisterInfoList == null) {
                             faceRegisterInfoList = new ArrayList<>();
                         }
-                        faceRegisterInfoList.add(new FaceRegisterInfo(faceFeature.getFeatureData(), userName));
+                        DbManager.getInstance().insertPersonnel(new Personnel(faceFeature.getFeatureData(), userName));
+                        faceRegisterInfoList.add(new Personnel(faceFeature.getFeatureData(), userName));
                         return true;
                     } else {
                         Log.e(TAG, "registerBgr24: extract face feature failed, code is " + code);
@@ -456,7 +441,7 @@ public class FaceServer {
         int maxSimilarIndex = -1;
         isProcessing = true;
         for (int i = 0; i < faceRegisterInfoList.size(); i++) {
-            tempFaceFeature.setFeatureData(faceRegisterInfoList.get(i).getFeatureData());
+            tempFaceFeature.setFeatureData(faceRegisterInfoList.get(i).getFeature());
             faceEngine.compareFaceFeature(faceFeature, tempFaceFeature, faceSimilar);
             Log.e("zxb", " 第   " + i + " 次比对    " + maxSimilar + "  最终角标    " + maxSimilarIndex);
             if (faceSimilar.getScore() > maxSimilar) {
@@ -467,7 +452,7 @@ public class FaceServer {
         Log.e("zxb", " 比对最高分" + maxSimilar);
         isProcessing = false;
         if (maxSimilarIndex != -1) {
-            return new CompareResult(faceRegisterInfoList.get(maxSimilarIndex).getName(), maxSimilar);
+            return new CompareResult(faceRegisterInfoList.get(maxSimilarIndex).getIdName(), maxSimilar);
         }
         return null;
     }
