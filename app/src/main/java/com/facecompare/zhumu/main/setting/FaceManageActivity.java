@@ -176,17 +176,6 @@ public class FaceManageActivity extends BaseActivity {
         });
     }
 
-    @Override
-    public void afterRequestPermission(int requestCode, boolean isAllGranted) {
-        if (requestCode == ACTION_REQUEST_PERMISSIONS) {
-            if (isAllGranted) {
-                doRegister();
-            } else {
-                ZhumuToastUtil.showToast(getString(R.string.permission_denied));
-            }
-        }
-    }
-
     public void clearFaces(View view) {
         int faceNum = FaceServer.getInstance().getFaceNumber(this);
         if (faceNum == 0) {

@@ -1,6 +1,7 @@
 package com.facecompare.zhumu.main.compare;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.util.DisplayMetrics;
@@ -146,11 +147,11 @@ public class CompareModel {
                     Integer liveness = livenessMap.get(requestId);
                     //不做活体检测的情况，直接搜索
                     if (!SettingUtils.getLivenewssDetect()) {
-                        searchFace(faceFeature, requestId, activity, getResultCallback);
+                        searchFace(faceFeature, requestId, getResultCallback);
                     }
                     //活体检测通过，搜索特征
                     else if (liveness != null && liveness == LivenessInfo.ALIVE) {
-                        searchFace(faceFeature, requestId, activity, getResultCallback);
+                        searchFace(faceFeature, requestId, getResultCallback);
                     }
                     //活体检测未出结果，或者非活体，延迟执行该函数
                     else {
@@ -342,6 +343,12 @@ public class CompareModel {
         cameraHelper.start();
     }
 
+    private Bitmap idCardBitmap = null;
+
+    public void setIdCardBitmap(Bitmap idPhoto) {
+        idCardBitmap = idPhoto;
+    }
+
     CameraHelper cameraHelper;
 
     public boolean refreshCamera() {
@@ -387,7 +394,7 @@ public class CompareModel {
      */
     private ConcurrentHashMap<Integer, Integer> requestFeatureStatusMap = new ConcurrentHashMap<>();
 
-    private void searchFace(final FaceFeature frFace, final Integer requestId, final AppCompatActivity activity, final GetResultCallback resultCallback) {
+    private void searchFace(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
                 .create(new ObservableOnSubscribe<CompareResult>() {
                     @Override
@@ -420,10 +427,10 @@ public class CompareModel {
                         if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
                             SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
                             requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
-                            faceHelper.setName(requestId, activity.getString(R.string.recognize_success_notice, compareResult.getUserName()));
+                            faceHelper.setName(requestId, "通过" + compareResult.getUserName());
                             resultCallback.getCompareResultCall(compareResult);
                         } else {
-                            faceHelper.setName(requestId, activity.getString(R.string.recognize_failed_notice, "NOT_REGISTERED"));
+                            faceHelper.setName(requestId, "未通过");
                             retryRecognizeDelayed(requestId);
                         }
 
@@ -431,7 +438,7 @@ public class CompareModel {
 
                     @Override
                     public void onError(Throwable e) {
-                        faceHelper.setName(requestId, activity.getString(R.string.recognize_failed_notice, "NOT_REGISTERED"));
+                        faceHelper.setName(requestId, "未通过");
                         retryRecognizeDelayed(requestId);
                     }
 

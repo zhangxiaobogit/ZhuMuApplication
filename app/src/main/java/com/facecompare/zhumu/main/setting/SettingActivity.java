@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.facecompare.zhumu.R;
+import com.facecompare.zhumu.main.BaseActivity;
 import com.facecompare.zhumu.util.SettingUtils;
 import com.facecompare.zhumu.util.SwitchUtil;
 import com.facecompare.zhumu.util.ZhumuToastUtil;
@@ -26,7 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class SettingActivity extends AppCompatActivity {
+public class SettingActivity extends BaseActivity {
     @BindView(R.id.sw_change_cameraid)
     Switch sw_change_cameraid;
     @BindView(R.id.sw_check_alive)
@@ -49,7 +50,6 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        ButterKnife.bind(this);
         initView();
     }
 

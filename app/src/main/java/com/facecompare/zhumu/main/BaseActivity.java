@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import butterknife.ButterKnife;
+
 public abstract class BaseActivity extends AppCompatActivity {
     /**
      * 所需的所有权限信息
@@ -21,6 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
+        ButterKnife.bind(this);
     }
 
     protected boolean checkPermissions(String[] neededPermissions) {
@@ -33,22 +36,4 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         return allGranted;
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        boolean isAllGranted = true;
-        for (int grantResult : grantResults) {
-            isAllGranted &= (grantResult == PackageManager.PERMISSION_GRANTED);
-        }
-        afterRequestPermission(requestCode, isAllGranted);
-    }
-
-    /**
-     * 请求权限的回调
-     *
-     * @param requestCode  请求码
-     * @param isAllGranted 是否全部被同意
-     */
-    public abstract void afterRequestPermission(int requestCode, boolean isAllGranted);
 }
