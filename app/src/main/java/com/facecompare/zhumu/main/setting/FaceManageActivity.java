@@ -187,8 +187,8 @@ public class FaceManageActivity extends BaseActivity {
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            int deleteCount = FaceServer.getInstance().clearAllFaces(FaceManageActivity.this);
-                            ZhumuToastUtil.showToast(deleteCount + " faces cleared!");
+                           FaceServer.getInstance().clearAllFaces(FaceManageActivity.this);
+                            ZhumuToastUtil.showToast(" faces cleared!");
                         }
                     })
                     .setNegativeButton(R.string.cancel, null)
