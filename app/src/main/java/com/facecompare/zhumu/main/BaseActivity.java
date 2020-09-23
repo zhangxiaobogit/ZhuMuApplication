@@ -9,8 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import butterknife.ButterKnife;
-
 public abstract class BaseActivity extends AppCompatActivity {
     /**
      * 所需的所有权限信息
@@ -23,7 +21,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        ButterKnife.bind(this);
+
     }
 
     protected boolean checkPermissions(String[] neededPermissions) {

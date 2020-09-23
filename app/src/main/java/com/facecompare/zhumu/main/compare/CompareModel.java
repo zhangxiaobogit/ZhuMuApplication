@@ -48,32 +48,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class CompareModel {
     private static final String TAG = "CompareModel";
-    private int ftInitCode = -1;
-    private int frInitCode = -1;
-    private int flInitCode = -1;
-    /**
-     * VIDEO模式人脸检测引擎，用于预览帧人脸追踪
-     */
-    private FaceEngine ftEngine;
-    /**
-     * 用于特征提取的引擎
-     */
-    private FaceEngine frEngine;
-    /**
-     * IMAGE模式活体检测引擎，用于预览帧人脸活体检测
-     */
-    private FaceEngine flEngine;
+
 
     /**
      * 用于存储活体值
@@ -94,7 +78,21 @@ public class CompareModel {
     private ConcurrentHashMap<Integer, Integer> livenessErrorRetryMap = new ConcurrentHashMap<>();
 
     private FaceHelper faceHelper;
-
+    private int ftInitCode = -1;
+    private int frInitCode = -1;
+    private int flInitCode = -1;
+    /**
+     * VIDEO模式人脸检测引擎，用于预览帧人脸追踪
+     */
+    private FaceEngine ftEngine;
+    /**
+     * 用于特征提取的引擎
+     */
+    private FaceEngine frEngine;
+    /**
+     * IMAGE模式活体检测引擎，用于预览帧人脸活体检测
+     */
+    private FaceEngine flEngine;
     public void initEngine(Context context) {
         ftEngine = new FaceEngine();
         ftInitCode = ftEngine.init(context, DetectMode.ASF_DETECT_MODE_VIDEO, ConfigUtil.getFtOrient(context),
@@ -246,15 +244,12 @@ public class CompareModel {
         CameraListener cameraListener = new CameraListener() {
             @Override
             public void onCameraOpened(Camera camera, int cameraId, int displayOrientation, boolean isMirror) {
-                Camera.Size lastPreviewSize = previewSize;
                 previewSize = camera.getParameters().getPreviewSize();
                 drawHelper = new DrawHelper(previewSize.width, previewSize.height, previewView.getWidth(), previewView.getHeight(), displayOrientation
                         , cameraId, isMirror, false, false);
                 Log.i("zxb", "onCameraOpened: " + drawHelper.toString());
                 // 切换相机的时候可能会导致预览尺寸发生变化
-                if (faceHelper == null ||
-                        lastPreviewSize == null ||
-                        lastPreviewSize.width != previewSize.width || lastPreviewSize.height != previewSize.height) {
+                if (faceHelper == null) {
                     Integer trackedFaceCount = null;
                     // 记录切换时的人脸序号
                     if (faceHelper != null) {
@@ -282,7 +277,7 @@ public class CompareModel {
                 }
                 List<FacePreviewInfo> facePreviewInfoList = faceHelper.onPreviewFrame(nv21);
                 if (facePreviewInfoList != null && faceRectView != null && drawHelper != null) {
-                    drawPreviewInfo(facePreviewInfoList, faceRectView, drawHelper);
+                    drawPreviewInfo(facePreviewInfoList, faceRectView, drawHelper,faceHelper);
                 }
                 clearLeftFace(facePreviewInfoList);
 
@@ -353,7 +348,7 @@ public class CompareModel {
     CameraHelper cameraHelper;
 
 
-    private void drawPreviewInfo(List<FacePreviewInfo> facePreviewInfoList, FaceRectView faceRectView, DrawHelper drawHelper) {
+    private void drawPreviewInfo(List<FacePreviewInfo> facePreviewInfoList, FaceRectView faceRectView, DrawHelper drawHelper,FaceHelper faceHelper) {
         List<DrawInfo> drawInfoList = new ArrayList<>();
         for (int i = 0; i < facePreviewInfoList.size(); i++) {
             String name = faceHelper.getName(facePreviewInfoList.get(i).getTrackId());
@@ -418,12 +413,11 @@ public class CompareModel {
     }
 
 
-
     private void singleCompare(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
                 .create((ObservableOnSubscribe<CompareResult>) emitter -> {
 //                        Log.i("zxb", "subscribe: fr search start = " + System.currentTimeMillis() + " trackId = " + requestId);
-                    CompareResult compareResult = FaceServer.getInstance().getSingleCopmare(frFace,new FaceFeature());
+                    CompareResult compareResult = FaceServer.getInstance().getSingleCopmare(frFace, new FaceFeature());
 //                        Log.i("zxb", "subscribe: fr search end = " + System.currentTimeMillis() + " trackId = " + requestId);
                     emitter.onNext(compareResult);
 
@@ -455,6 +449,7 @@ public class CompareModel {
                 });
 
     }
+
     /**
      * 注册人脸状态码，注册结束（无论成功失败）
      */
@@ -512,9 +507,6 @@ public class CompareModel {
     /**
      * 延迟 FAIL_RETRY_INTERVAL 重新进行人脸识别
      *
-     * @param requestId 人脸ID
-     */
-    /**
      * 失败重试间隔时间（ms）
      */
     private static final long FAIL_RETRY_INTERVAL = 1000;
