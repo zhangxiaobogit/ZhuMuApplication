@@ -6,7 +6,7 @@ import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.LivenessInfo;
 import com.facecompare.zhumu.common.Constants;
-import com.facecompare.zhumu.faceserver.CompareResult;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.faceserver.FaceServer;
 import com.facecompare.zhumu.main.compare.GetResultCallback;
 import com.facecompare.zhumu.model.RequestFeatureStatus;
@@ -39,17 +39,22 @@ public class ARCFaceListener implements FaceListener {
      * 用于存储活体值
      */
     private ConcurrentHashMap<Integer, Integer> livenessMap = new ConcurrentHashMap<>();
+    /**
+     * 用于记录人脸特征提取出错重试次数
+     */
+    private ConcurrentHashMap<Integer, Integer> extractErrorRetryMap = new ConcurrentHashMap<>();
     private CompositeDisposable getFeatureDelayedDisposables = new CompositeDisposable();
+    private ConcurrentHashMap<Integer, Integer> livenessErrorRetryMap = new ConcurrentHashMap<>();
+    /**
+     * 用于记录人脸识别相关状态
+     */
+    private ConcurrentHashMap<Integer, Integer> requestFeatureStatusMap = new ConcurrentHashMap<>();
 
     @Override
     public void onFail(Exception e) {
 
     }
 
-    /**
-     * 用于记录人脸特征提取出错重试次数
-     */
-    private ConcurrentHashMap<Integer, Integer> extractErrorRetryMap = new ConcurrentHashMap<>();
 
     @Override
     public void onFaceFeatureInfoGet(FaceFeature faceFeature, Integer requestId, Integer errorCode) {
@@ -57,16 +62,12 @@ public class ARCFaceListener implements FaceListener {
         if (faceFeature != null) {
 //                    Log.i("zxb", "onPreview: fr end = " + System.currentTimeMillis() + " trackId = " + requestId);
             Integer liveness = livenessMap.get(requestId);
-            //不做活体检测的情况，直接搜索
-            if (!SettingUtils.getLivenewssDetect()) {
+
+            if (!SettingUtils.getLivenewssDetect()) {//不做活体检测的情况，直接搜索
                 searchFace(faceFeature, requestId, resultCallback);
-            }
-            //活体检测通过，搜索特征
-            else if (liveness != null && liveness == LivenessInfo.ALIVE) {
+            } else if (liveness != null && liveness == LivenessInfo.ALIVE) {//活体检测通过，搜索特征
                 searchFace(faceFeature, requestId, resultCallback);
-            }
-            //活体检测未出结果，或者非活体，延迟执行该函数
-            else {
+            } else {//活体检测未出结果，或者非活体，延迟执行该函数
                 if (requestFeatureStatusMap.containsKey(requestId)) {
                     Observable.timer(Constants.WAIT_LIVENESS_INTERVAL, TimeUnit.MILLISECONDS)
                             .subscribe(new io.reactivex.Observer<Long>() {
@@ -97,16 +98,14 @@ public class ARCFaceListener implements FaceListener {
                 }
             }
 
-        }
-        //特征提取失败
-        else {
+        } else { //特征提取失败
             if (increaseAndGetValue(extractErrorRetryMap, requestId) > Constants.MAX_RETRY_TIME) {
                 extractErrorRetryMap.put(requestId, 0);
 
                 String msg;
                 // 传入的FaceInfo在指定的图像上无法解析人脸，此处使用的是RGB人脸数据，一般是人脸模糊
                 if (errorCode != null && errorCode == ErrorInfo.MERR_FSDK_FACEFEATURE_LOW_CONFIDENCE_LEVEL) {
-                    msg = "人脸置信度低";
+                    msg = "比对未通过";
                 } else {
                     msg = "ExtractCode:" + errorCode;
                 }
@@ -119,8 +118,6 @@ public class ARCFaceListener implements FaceListener {
             }
         }
     }
-
-    private ConcurrentHashMap<Integer, Integer> livenessErrorRetryMap = new ConcurrentHashMap<>();
 
     @Override
     public void onFaceLivenessInfoGet(LivenessInfo livenessInfo, Integer requestId, Integer errorCode) {
@@ -151,16 +148,11 @@ public class ARCFaceListener implements FaceListener {
         }
     }
 
-    /**
-     * 用于记录人脸识别相关状态
-     */
-    private ConcurrentHashMap<Integer, Integer> requestFeatureStatusMap = new ConcurrentHashMap<>();
-
     private void searchFace(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
-                .create((ObservableOnSubscribe<CompareResult>) emitter -> {
+                .create((ObservableOnSubscribe<VisitorInfo>) emitter -> {
 //                        Log.i("zxb", "subscribe: fr search start = " + System.currentTimeMillis() + " trackId = " + requestId);
-                    CompareResult compareResult = FaceServer.getInstance().getTopOfFaceLib(frFace);
+                    VisitorInfo compareResult = FaceServer.getInstance().getTopOfFaceLib(frFace);
 //                        Log.i("zxb", "subscribe: fr search end = " + System.currentTimeMillis() + " trackId = " + requestId);
                     emitter.onNext(compareResult);
 
@@ -168,18 +160,18 @@ public class ARCFaceListener implements FaceListener {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(compareResult -> {
-                    if (compareResult == null || compareResult.getUserName() == null) {
+                    if (compareResult == null || compareResult.getVisitName() == null) {
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.FAILED);
                         faceHelper.setName(requestId, "VISITOR " + requestId);
                         return;
                     }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                    Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getUserName());
-                    if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
-                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
+                    Log.e("zxb", " 比对分数  " + compareResult.getVisitCompareScore() + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getVisitName());
+                    if (compareResult.getVisitCompareFlag().equals(Constants.COMPARE_SUCCESS)) {
+                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getVisitName());
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
-                        faceHelper.setName(requestId, "通过" + compareResult.getUserName());
+                        faceHelper.setName(requestId, "通过" + compareResult.getVisitName());
                         resultCallback.getCompareResultCall(compareResult);
                     } else {
                         faceHelper.setName(requestId, "未通过");
@@ -192,11 +184,13 @@ public class ARCFaceListener implements FaceListener {
                 });
 
     }
+
+
     private void singleCompare(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
-                .create((ObservableOnSubscribe<CompareResult>) emitter -> {
+                .create((ObservableOnSubscribe<VisitorInfo>) emitter -> {
 //                        Log.i("zxb", "subscribe: fr search start = " + System.currentTimeMillis() + " trackId = " + requestId);
-                    CompareResult compareResult = FaceServer.getInstance().getSingleCopmare(frFace, new FaceFeature());
+                    VisitorInfo compareResult = FaceServer.getInstance().getSingleCopmare(frFace, new FaceFeature());
 //                        Log.i("zxb", "subscribe: fr search end = " + System.currentTimeMillis() + " trackId = " + requestId);
                     emitter.onNext(compareResult);
 
@@ -204,18 +198,18 @@ public class ARCFaceListener implements FaceListener {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(compareResult -> {
-                    if (compareResult == null || compareResult.getUserName() == null) {
+                    if (compareResult == null || compareResult.getVisitName() == null) {
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.FAILED);
                         faceHelper.setName(requestId, "VISITOR " + requestId);
                         return;
                     }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                    Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getUserName());
-                    if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
-                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
+                    Log.e("zxb", " 比对分数  " + compareResult.getVisitCompareScore() + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getVisitName());
+                    if (compareResult.getVisitCompareFlag().equals(Constants.COMPARE_SUCCESS)) {
+                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getVisitName());
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
-                        faceHelper.setName(requestId, "通过" + compareResult.getUserName());
+                        faceHelper.setName(requestId, "通过" + compareResult.getVisitName());
                         resultCallback.getCompareResultCall(compareResult);
                     } else {
                         faceHelper.setName(requestId, "未通过");
@@ -228,6 +222,7 @@ public class ARCFaceListener implements FaceListener {
                 });
 
     }
+
     /**
      * 延迟 FAIL_RETRY_INTERVAL 重新进行人脸识别
      * <p>
@@ -340,22 +335,25 @@ public class ARCFaceListener implements FaceListener {
     }
 
 
-    public ConcurrentHashMap<Integer, Integer> getFeatureStatusMap(){
+    public ConcurrentHashMap<Integer, Integer> getFeatureStatusMap() {
         return requestFeatureStatusMap;
     }
-    public ConcurrentHashMap<Integer, Integer> getLivnessStatusMap(){
+
+    public ConcurrentHashMap<Integer, Integer> getLivnessStatusMap() {
         return livenessMap;
     }
+
     /**
      * 用于记录人脸特征提取出错重试次数
      */
-    public ConcurrentHashMap<Integer, Integer> getErrorFeatureMap(){
+    public ConcurrentHashMap<Integer, Integer> getErrorFeatureMap() {
         return extractErrorRetryMap;
     }
+
     /**
      * 用于记录活体人脸特征提取出错重试次数
      */
-    public ConcurrentHashMap<Integer, Integer> getErrorLivnessMap(){
+    public ConcurrentHashMap<Integer, Integer> getErrorLivnessMap() {
         return livenessErrorRetryMap;
     }
 

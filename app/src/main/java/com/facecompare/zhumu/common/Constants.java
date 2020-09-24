@@ -36,4 +36,11 @@ public class Constants {
      * 当FR成功，活体未成功时，FR等待活体的时间
      */
     public static final int WAIT_LIVENESS_INTERVAL = 100;
+
+
+    public static final String COMPARE_SUCCESS = "1";
+    public static final String COMPARE_FAIL = "2";
+
+    public static final String COMPARE_TYPE_CARD = "1";
+    public static final String COMPARE_TYPE_FACE = "2";
 }

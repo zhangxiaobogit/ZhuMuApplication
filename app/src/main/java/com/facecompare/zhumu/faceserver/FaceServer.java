@@ -16,8 +16,11 @@ import com.arcsoft.imageutil.ArcSoftImageFormat;
 import com.arcsoft.imageutil.ArcSoftImageUtil;
 import com.arcsoft.imageutil.ArcSoftImageUtilError;
 import com.arcsoft.imageutil.ArcSoftRotateDegree;
+import com.facecompare.zhumu.common.Constants;
 import com.facecompare.zhumu.common.dbentity.Personnel;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.db.DbManager;
+import com.facecompare.zhumu.util.SettingUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -432,7 +435,7 @@ public class FaceServer {
      * @param faceFeature 传入特征数据
      * @return 比对结果
      */
-    public CompareResult getTopOfFaceLib(FaceFeature faceFeature) {
+    public VisitorInfo getTopOfFaceLib(FaceFeature faceFeature) {
         if (faceEngine == null || isProcessing || faceFeature == null || faceRegisterInfoList == null || faceRegisterInfoList.size() == 0) {
             return null;
         }
@@ -453,7 +456,16 @@ public class FaceServer {
         Log.e("zxb", " 比对最高分" + maxSimilar);
         isProcessing = false;
         if (maxSimilarIndex != -1) {
-            return new CompareResult(faceRegisterInfoList.get(maxSimilarIndex).getIdName(), maxSimilar);
+            VisitorInfo visitorInfo = new VisitorInfo();
+            visitorInfo.personel2VistorInfo(faceRegisterInfoList.get(maxSimilarIndex));
+            visitorInfo.setVisitCompareScore(String.valueOf((int) (maxSimilar * 100)));
+            if ((int) (maxSimilar * 100) > SettingUtils.getMoreCompareScore()) {
+                visitorInfo.setVisitCompareFlag(Constants.COMPARE_SUCCESS);
+            } else {
+                visitorInfo.setVisitCompareFlag(Constants.COMPARE_FAIL);
+            }
+            visitorInfo.setVisitCompareType(Constants.COMPARE_TYPE_FACE);
+            return visitorInfo;
         }
         return null;
     }
@@ -464,7 +476,7 @@ public class FaceServer {
      * @param idFaceFeature 传入特征数据
      * @return 比对结果
      */
-    public CompareResult getSingleCopmare(FaceFeature idFaceFeature, FaceFeature nowFaceFeature) {
+    public VisitorInfo getSingleCopmare(FaceFeature idFaceFeature, FaceFeature nowFaceFeature) {
         if (faceEngine == null || isProcessing || idFaceFeature == null || nowFaceFeature == null) {
             return null;
         }
@@ -474,7 +486,16 @@ public class FaceServer {
         isProcessing = true;
         faceEngine.compareFaceFeature(idFaceFeature, nowFaceFeature, faceSimilar);
         if (faceSimilar.getScore() > maxSimilar) {
-            maxSimilar = faceSimilar.getScore();
+            VisitorInfo visitorInfo = new VisitorInfo();
+            visitorInfo.personel2VistorInfo(faceRegisterInfoList.get(maxSimilarIndex));
+            visitorInfo.setVisitCompareScore(String.valueOf((int) (maxSimilar * 100)));
+            if ((int) (maxSimilar * 100) > SettingUtils.getSingleCompareScore()) {
+                visitorInfo.setVisitCompareFlag(Constants.COMPARE_SUCCESS);
+            } else {
+                visitorInfo.setVisitCompareFlag(Constants.COMPARE_FAIL);
+            }
+            visitorInfo.setVisitCompareType(Constants.COMPARE_TYPE_CARD);
+            return visitorInfo;
         }
         Log.e("zxb", " 比对最高分" + maxSimilar);
         isProcessing = false;

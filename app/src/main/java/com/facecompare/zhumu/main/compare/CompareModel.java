@@ -21,7 +21,7 @@ import com.arcsoft.face.enums.DetectFaceOrientPriority;
 import com.arcsoft.face.enums.DetectMode;
 import com.facecompare.zhumu.R;
 import com.facecompare.zhumu.common.Constants;
-import com.facecompare.zhumu.faceserver.CompareResult;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.faceserver.FaceServer;
 import com.facecompare.zhumu.model.DrawInfo;
 import com.facecompare.zhumu.model.FacePreviewInfo;
@@ -93,6 +93,7 @@ public class CompareModel {
      * IMAGE模式活体检测引擎，用于预览帧人脸活体检测
      */
     private FaceEngine flEngine;
+
     public void initEngine(Context context) {
         ftEngine = new FaceEngine();
         ftInitCode = ftEngine.init(context, DetectMode.ASF_DETECT_MODE_VIDEO, ConfigUtil.getFtOrient(context),
@@ -277,7 +278,7 @@ public class CompareModel {
                 }
                 List<FacePreviewInfo> facePreviewInfoList = faceHelper.onPreviewFrame(nv21);
                 if (facePreviewInfoList != null && faceRectView != null && drawHelper != null) {
-                    drawPreviewInfo(facePreviewInfoList, faceRectView, drawHelper,faceHelper);
+                    drawPreviewInfo(facePreviewInfoList, faceRectView, drawHelper, faceHelper);
                 }
                 clearLeftFace(facePreviewInfoList);
 
@@ -348,7 +349,7 @@ public class CompareModel {
     CameraHelper cameraHelper;
 
 
-    private void drawPreviewInfo(List<FacePreviewInfo> facePreviewInfoList, FaceRectView faceRectView, DrawHelper drawHelper,FaceHelper faceHelper) {
+    private void drawPreviewInfo(List<FacePreviewInfo> facePreviewInfoList, FaceRectView faceRectView, DrawHelper drawHelper, FaceHelper faceHelper) {
         List<DrawInfo> drawInfoList = new ArrayList<>();
         for (int i = 0; i < facePreviewInfoList.size(); i++) {
             String name = faceHelper.getName(facePreviewInfoList.get(i).getTrackId());
@@ -377,9 +378,9 @@ public class CompareModel {
 
     private void searchFace(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
-                .create((ObservableOnSubscribe<CompareResult>) emitter -> {
+                .create((ObservableOnSubscribe<VisitorInfo>) emitter -> {
 //                        Log.i("zxb", "subscribe: fr search start = " + System.currentTimeMillis() + " trackId = " + requestId);
-                    CompareResult compareResult = FaceServer.getInstance().getTopOfFaceLib(frFace);
+                    VisitorInfo compareResult = FaceServer.getInstance().getTopOfFaceLib(frFace);
 //                        Log.i("zxb", "subscribe: fr search end = " + System.currentTimeMillis() + " trackId = " + requestId);
                     emitter.onNext(compareResult);
 
@@ -387,18 +388,18 @@ public class CompareModel {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(compareResult -> {
-                    if (compareResult == null || compareResult.getUserName() == null) {
+                    if (compareResult == null || compareResult.getVisitName() == null) {
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.FAILED);
                         faceHelper.setName(requestId, "VISITOR " + requestId);
                         return;
                     }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                    Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getUserName());
-                    if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
-                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
+                    Log.e("zxb", " 比对分数  " + compareResult.getVisitCompareScore() + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getVisitName());
+                    if (Integer.valueOf(compareResult.getVisitCompareScore()) > SettingUtils.getMoreCompareScore()) {
+                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getVisitName());
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
-                        faceHelper.setName(requestId, "通过" + compareResult.getUserName());
+                        faceHelper.setName(requestId, "通过" + compareResult.getVisitName());
                         resultCallback.getCompareResultCall(compareResult);
                     } else {
                         faceHelper.setName(requestId, "未通过");
@@ -415,9 +416,9 @@ public class CompareModel {
 
     private void singleCompare(final FaceFeature frFace, final Integer requestId, final GetResultCallback resultCallback) {
         Observable
-                .create((ObservableOnSubscribe<CompareResult>) emitter -> {
+                .create((ObservableOnSubscribe<VisitorInfo>) emitter -> {
 //                        Log.i("zxb", "subscribe: fr search start = " + System.currentTimeMillis() + " trackId = " + requestId);
-                    CompareResult compareResult = FaceServer.getInstance().getSingleCopmare(frFace, new FaceFeature());
+                    VisitorInfo compareResult = FaceServer.getInstance().getSingleCopmare(frFace, new FaceFeature());
 //                        Log.i("zxb", "subscribe: fr search end = " + System.currentTimeMillis() + " trackId = " + requestId);
                     emitter.onNext(compareResult);
 
@@ -425,18 +426,18 @@ public class CompareModel {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(compareResult -> {
-                    if (compareResult == null || compareResult.getUserName() == null) {
+                    if (compareResult == null || compareResult.getVisitName() == null) {
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.FAILED);
                         faceHelper.setName(requestId, "VISITOR " + requestId);
                         return;
                     }
 
 //                        Log.i("zxb", "onNext: fr search get result  = " + System.currentTimeMillis() + " trackId = " + requestId + "  similar = " + compareResult.getSimilar());
-                    Log.e("zxb", " 比对分数  " + ((int) (compareResult.getSimilar() * 100)) + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getUserName());
-                    if (((int) (compareResult.getSimilar() * 100)) > SettingUtils.getMoreCompareScore()) {
-                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getUserName());
+                    Log.e("zxb", " 比对分数  " + compareResult.getVisitCompareScore() + "  比对阈值 " + SettingUtils.getMoreCompareScore() + "  姓名  " + compareResult.getVisitName());
+                    if (Integer.valueOf(compareResult.getVisitCompareScore()) > SettingUtils.getMoreCompareScore()) {
+                        SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getVisitName());
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
-                        faceHelper.setName(requestId, "通过" + compareResult.getUserName());
+                        faceHelper.setName(requestId, "通过" + compareResult.getVisitName());
                         resultCallback.getCompareResultCall(compareResult);
                     } else {
                         faceHelper.setName(requestId, "未通过");
@@ -506,7 +507,7 @@ public class CompareModel {
 
     /**
      * 延迟 FAIL_RETRY_INTERVAL 重新进行人脸识别
-     *
+     * <p>
      * 失败重试间隔时间（ms）
      */
     private static final long FAIL_RETRY_INTERVAL = 1000;

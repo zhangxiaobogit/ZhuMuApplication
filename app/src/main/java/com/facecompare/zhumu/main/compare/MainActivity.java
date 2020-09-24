@@ -27,7 +27,7 @@ import com.csht.netty.entry.Info;
 import com.cshtface.sdk.bean.msg;
 import com.facecompare.zhumu.R;
 import com.facecompare.zhumu.common.Constants;
-import com.facecompare.zhumu.faceserver.CompareResult;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.faceserver.FaceServer;
 import com.facecompare.zhumu.main.BaseActivity;
 import com.facecompare.zhumu.main.setting.FaceManageActivity;
@@ -282,11 +282,11 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     }
 
     @Override
-    public void getCompareResultCall(CompareResult compareResult) {
-        File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getUserName() + FaceServer.IMG_SUFFIX);
+    public void getCompareResultCall(VisitorInfo compareResult) {
+        File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getVisitName() + FaceServer.IMG_SUFFIX);
         Glide.with(iv_head)
                 .load(imgFile)
                 .into(iv_head);
-        tv_name.setText(compareResult.getUserName());
+        tv_name.setText(compareResult.getVisitName());
     }
 }
