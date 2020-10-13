@@ -25,12 +25,12 @@
             android:layout_weight="1">
 
             <TextureView
-                android:id="@+id/single_camera_texture_preview"
+                android:id="@+id/texture_camera"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
             <com.facecompare.zhumu.view.FaceRectView
-                android:id="@+id/single_camera_face_rect_view"
+                android:id="@+id/face_rect_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 

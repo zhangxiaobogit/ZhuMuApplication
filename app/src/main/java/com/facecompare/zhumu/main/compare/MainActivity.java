@@ -27,7 +27,7 @@ import com.csht.netty.entry.Info;
 import com.cshtface.sdk.bean.msg;
 import com.facecompare.zhumu.R;
 import com.facecompare.zhumu.common.Constants;
-import com.facecompare.zhumu.faceserver.CompareResult;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.faceserver.FaceServer;
 import com.facecompare.zhumu.main.BaseActivity;
 import com.facecompare.zhumu.main.setting.FaceManageActivity;
@@ -36,7 +36,6 @@ import com.facecompare.zhumu.util.AdBannerShow;
 import com.facecompare.zhumu.util.BaseCompareUtil;
 import com.facecompare.zhumu.util.ImageUtil;
 import com.facecompare.zhumu.util.TextToSpeechUtils;
-import com.facecompare.zhumu.util.ZhumuToastUtil;
 import com.facecompare.zhumu.view.CameraView;
 import com.facecompare.zhumu.view.FaceOverlayViews;
 import com.facecompare.zhumu.view.FaceRectView;
@@ -48,6 +47,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class MainActivity extends BaseActivity implements CameraView.OnCameraStateChangedListener, ViewTreeObserver.OnGlobalLayoutListener, GetResultCallback {
@@ -56,26 +56,37 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     private byte[] idHeadByte;
     private byte[] idCardFaces;
     public static ExecutorService mainExecutors;
-    @BindView(R.id.single_camera_texture_preview)
-    View previewView;
+    @BindView(R.id.texture_camera)
+    View texture_camera;
     @BindView(R.id.iv_head)
     ImageView iv_head;
     @BindView(R.id.tv_name)
     TextView tv_name;
+    @BindView(R.id.tv_title)
+    TextView tv_title;
     /**
      * 绘制人脸框的控件
      */
-    private FaceRectView faceRectView;
-    private CompareModel compareModel;
+    @BindView(R.id.face_rect_view)
+    FaceRectView face_rect_view;
+    @BindView(R.id.banner_adv)
+    Banner banner_adv;
+    @BindView(R.id.tc_clock)
+    TextClock tc_clock;
 
+    private CompareModel compareModel;
+    private NewCompareModel newCompareModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
-        AdBannerShow.getInstance().initAdBanner((Banner) findViewById(R.id.banner_adv));
+        ButterKnife.bind(this);
+        AdBannerShow.getInstance().initAdBanner(banner_adv);
         compareModel = new CompareModel();
+//        newCompareModel = new NewCompareModel();
         initNfcReader();
+
         initView();
         initReadCard();
         if (mainExecutors == null) {
@@ -86,11 +97,10 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     public void initView() {
 //        initCameraView((CameraView) findViewById(R.id.cameraview), (FaceOverlayViews) findViewById(R.id.face_overlay_view), this);
         //在布局结束后才做初始化操作
-        previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);
-        faceRectView = findViewById(R.id.single_camera_face_rect_view);
-        ((ImageViewRoundOval) findViewById(R.id.iv_head)).setType(ImageViewRoundOval.TYPE_CIRCLE);
-        ((TextClock) findViewById(R.id.tc_clock)).setFormat24Hour("yyyy年 MM月 dd日");
-        findViewById(R.id.tv_title).setOnLongClickListener(new View.OnLongClickListener() {
+        texture_camera.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        ((ImageViewRoundOval) iv_head).setType(ImageViewRoundOval.TYPE_CIRCLE);
+        tc_clock.setFormat24Hour("yyyy年 MM月 dd日");
+        tv_title.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 startActivity(new Intent(MainActivity.this, SettingActivity.class));
@@ -256,12 +266,12 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
 
     @Override
     public void onGlobalLayout() {
-        previewView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        texture_camera.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         if (!checkPermissions(NEEDED_PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
         } else {
             compareModel.initEngine(this);
-            compareModel.initCamera(this, faceRectView, previewView, this);
+            compareModel.initCamera(this, face_rect_view, texture_camera, this);
         }
     }
 
@@ -272,11 +282,11 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     }
 
     @Override
-    public void getCompareResultCall(CompareResult compareResult) {
-        File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getUserName() + FaceServer.IMG_SUFFIX);
+    public void getCompareResultCall(VisitorInfo compareResult) {
+        File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getVisitName() + FaceServer.IMG_SUFFIX);
         Glide.with(iv_head)
                 .load(imgFile)
                 .into(iv_head);
-        tv_name.setText(compareResult.getUserName());
+        tv_name.setText(compareResult.getVisitName());
     }
 }

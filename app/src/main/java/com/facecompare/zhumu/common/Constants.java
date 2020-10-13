@@ -32,4 +32,15 @@ public class Constants {
     public static final int SOUNDPOOL_TYPE_HOUSE_USER_CALL = 9;//业主呼叫声音
     public static final int SOUNDPOOL_TYPE_BIBIBI = 10;//BIBIBI
 
+    /**
+     * 当FR成功，活体未成功时，FR等待活体的时间
+     */
+    public static final int WAIT_LIVENESS_INTERVAL = 100;
+
+
+    public static final String COMPARE_SUCCESS = "1";
+    public static final String COMPARE_FAIL = "2";
+
+    public static final String COMPARE_TYPE_CARD = "1";
+    public static final String COMPARE_TYPE_FACE = "2";
 }

@@ -5,7 +5,9 @@ import android.database.Cursor;
 
 import com.csht.common.LogUtils;
 import com.facecompare.zhumu.common.dbentity.Personnel;
+import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.gen.PersonnelDao;
+import com.facecompare.zhumu.gen.VisitorInfoDao;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -94,6 +96,10 @@ public class DbManager {
             }
         }
 
+    }
+    public void insertVisitHistory(VisitorInfo visitorInfo) {
+        VisitorInfoDao dao = GreenDaoManager.getInstance().getSession().getVisitorInfoDao();
+        dao.insert(visitorInfo);
     }
 
 

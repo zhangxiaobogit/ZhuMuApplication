@@ -1,12 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao'
-
+def static releaseTime() {
+    return new Date().format("yyyy-MM-dd_HHmms", TimeZone.getTimeZone("GMT+8:00"))
+}
 android {
     compileSdkVersion 29
 
     defaultConfig {
         applicationId "com.facecompare.zhumu"
-        minSdkVersion 21
+        minSdkVersion 17
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -23,7 +25,22 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //自定义输出配置
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    if (variant.buildType.name == "release") {
+                        outputFileName = "瞩目视界_${defaultConfig.versionName}_${defaultConfig.versionCode}_${releaseTime()}_release.apk"
+                    } else {
+                        outputFileName = "瞩目视界_${defaultConfig.versionName}_${defaultConfig.versionCode}_${releaseTime()}_debug.apk"
+                    }
+                }
+            }
+
+        }
+        debug {
+            debuggable true
+            minifyEnabled false
         }
     }
 }
