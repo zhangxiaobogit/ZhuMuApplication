@@ -2,11 +2,39 @@ package com.facecompare.zhumu.common.dbentity;
 
 
 import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
 
 @Entity
 public class Personnel {
+
+
+    String workUnitId;
+    ;//是	String	使用单位id
+    String workUnitName;//是	String	部门名称
+    String date;//是	String	获取数据时间用于 增量更新
+    String usersData;//否	String	数据集
+    String userId;//否	String	用户id
+    String userName;//否	String	用户名称
+
+    String userBirthday;//是	String	出生日期
+    String userSex;//否	String	性别	（0男1女）
+    String userNation;//否	String	民族
+    String userPolice;//否	String	用户签发机关
+    String userAddress;//否	String	用户住址
+    String userCardNum;//否	String	用户身份证号
+    String userCardPhoto;//是	String	用户证件照	图片路径
+    String userNowPhoto;//是	String	用户生活	图片路径
+    String userCardStartTime;//否	String	用户有效开始日期
+    String userCardEndTime;//否	String	用户有效结束日期
+    String logonScore;//否	String	注册分数
+
+    String userFeature;//是	String	特征值
+    String updatedate;//否	String	人员更新时间
+    String logonTime;//否	String	人员注册时间
+    String userPlace;//否	userPlace	人员籍贯
+
+
     @Id
     Long id;
     String guid;
@@ -30,9 +58,9 @@ public class Personnel {
 
     @Generated(hash = 1582017080)
     public Personnel(Long id, String guid, String idName, String idNum,
-            String idSex, String idNation, String idBirthday, String idAddress,
-            String idPolice, String idPhoto, String photoPath, String validityTime,
-            byte[] feature, String phone) {
+                     String idSex, String idNation, String idBirthday, String idAddress,
+                     String idPolice, String idPhoto, String photoPath, String validityTime,
+                     byte[] feature, String phone) {
         this.id = id;
         this.guid = guid;
         this.idName = idName;
