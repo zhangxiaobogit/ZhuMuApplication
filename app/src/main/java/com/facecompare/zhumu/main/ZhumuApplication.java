@@ -3,15 +3,19 @@ package com.facecompare.zhumu.main;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.arcsoft.face.ActiveFileInfo;
 import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.enums.RuntimeABI;
+import com.csht.common.LogUtils;
 import com.csht.cshthardwarecontrol.api.UtilsConfig;
+import com.facecompare.zhumu.GetUseListService;
 import com.facecompare.zhumu.R;
 import com.facecompare.zhumu.common.Constants;
+import com.facecompare.zhumu.util.NetUtils;
 import com.facecompare.zhumu.util.TextToSpeechUtils;
 import com.facecompare.zhumu.util.ZhumuToastUtil;
 
@@ -154,6 +158,13 @@ public class ZhumuApplication extends Application {
 
                     }
                 });
+
+    }
+    private void initService() {
+        if (NetUtils.getNetWorkState(getApplicationContext(), "www.baidu")) {
+            LogUtils.e("zxb", " startUp" + " 启动mqttService  onCreate()");
+            startService(new Intent(getApplicationContext(), GetUseListService.class));
+        }
 
     }
 
