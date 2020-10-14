@@ -14,7 +14,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.facecompare.zhumu.R;
 import com.facecompare.zhumu.main.BaseActivity;
@@ -50,6 +49,7 @@ public class SettingActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
+        ButterKnife.bind(this);
         initView();
     }
 

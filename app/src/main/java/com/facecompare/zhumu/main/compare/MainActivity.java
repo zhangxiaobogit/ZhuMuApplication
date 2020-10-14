@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -74,7 +75,7 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     @BindView(R.id.tc_clock)
     TextClock tc_clock;
 
-    private CompareModel compareModel;
+//    private CompareModel compareModel;
     private NewCompareModel newCompareModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +84,8 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         AdBannerShow.getInstance().initAdBanner(banner_adv);
-        compareModel = new CompareModel();
-//        newCompareModel = new NewCompareModel();
+//        compareModel = new CompareModel();
+        newCompareModel = new NewCompareModel();
         initNfcReader();
 
         initView();
@@ -253,13 +254,13 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
     @Override
     protected void onResume() {
         super.onResume();
-        compareModel.cameraStart();
+        newCompareModel.cameraStart();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        compareModel.cameraStop();
+        newCompareModel.cameraStop();
     }
 
     private static final int ACTION_REQUEST_PERMISSIONS = 0x001;
@@ -270,23 +271,50 @@ public class MainActivity extends BaseActivity implements CameraView.OnCameraSta
         if (!checkPermissions(NEEDED_PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, NEEDED_PERMISSIONS, ACTION_REQUEST_PERMISSIONS);
         } else {
-            compareModel.initEngine(this);
-            compareModel.initCamera(this, face_rect_view, texture_camera, this);
+            newCompareModel.initCamera(this, face_rect_view, texture_camera, this);
         }
     }
 
     @Override
     protected void onDestroy() {
-        compareModel.ARCRelese(this);
+        newCompareModel.ARCRelese(this);
         super.onDestroy();
     }
-
+    private int faceTag = 0;
     @Override
     public void getCompareResultCall(VisitorInfo compareResult) {
+        faceTag++;
         File imgFile = new File(FaceManageActivity.REGISTER_DIR + "/" + compareResult.getVisitName() + FaceServer.IMG_SUFFIX);
         Glide.with(iv_head)
                 .load(imgFile)
                 .into(iv_head);
         tv_name.setText(compareResult.getVisitName());
+        handler.removeCallbacks(faceMissRun);
+        handler.postDelayed(faceMissRun, 3000);
+    }
+    private Handler handler = new Handler();
+    private Runnable faceMissRun = new Runnable() {
+        @Override
+        public void run() {
+            dismissFaceUi(faceTag);
+        }
+    };
+    @Override
+    public void onFaceDismiss(int showTag) {
+        handler.removeCallbacks(faceMissRun);
+        dismissFaceUi(faceTag);
+    }
+    public void dismissFaceUi(int flag){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (flag == faceTag) {
+                    Glide.with(iv_head)
+                            .load(R.mipmap.ic_app)
+                            .into(iv_head);
+                    tv_name.setText("");
+                }
+            }
+        });
     }
 }

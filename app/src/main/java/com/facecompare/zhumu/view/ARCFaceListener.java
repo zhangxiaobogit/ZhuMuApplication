@@ -5,6 +5,7 @@ import android.util.Log;
 import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.LivenessInfo;
+import com.csht.cshthardwarecontrol.api.OpenDoorApi;
 import com.facecompare.zhumu.common.Constants;
 import com.facecompare.zhumu.common.dbentity.VisitorInfo;
 import com.facecompare.zhumu.faceserver.FaceServer;
@@ -172,6 +173,7 @@ public class ARCFaceListener implements FaceListener {
                         SoundUtils.getInstance().playSelfCompareSound(true, compareResult.getVisitName());
                         requestFeatureStatusMap.put(requestId, RequestFeatureStatus.SUCCEED);
                         faceHelper.setName(requestId, "通过" + compareResult.getVisitName());
+                        OpenDoorApi.getInstance().openDoor(true, 2000);
                         resultCallback.getCompareResultCall(compareResult);
                     } else {
                         faceHelper.setName(requestId, "未通过");
