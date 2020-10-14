@@ -36,7 +36,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- * 描 述：
+ * 描 述：获取视频流进行比对
  * 作 者：zxb  2020-09-23 9:28
  * 修改描述： XXX
  * 修 改 人： XXX  2020-09-23 9:28
@@ -134,6 +134,7 @@ public class ARCCameraListener implements CameraListener {
                     .faceListener(arcFaceListener)
                     .trackedFaceCount(trackedFaceCount == null ? ConfigUtil.getTrackedFaceCount(mContext) : trackedFaceCount)
                     .build();
+            arcFaceListener.setFaceHelper(faceHelper);
         }
     }
 
@@ -148,8 +149,10 @@ public class ARCCameraListener implements CameraListener {
         }
         clearLeftFace(facePreviewInfoList);
 
-        if (facePreviewInfoList == null || facePreviewInfoList.size() < 1 || previewSize == null)
+        if (facePreviewInfoList == null || facePreviewInfoList.size() < 1 || previewSize == null) {
+            resultCallback.onFaceDismiss(0);
             return;
+        }
         for (FacePreviewInfo facePreviewInfo : facePreviewInfoList) {
             Integer status = arcFaceListener.getFeatureStatusMap().get(facePreviewInfo.getTrackId());
             /**
@@ -288,8 +291,10 @@ public class ARCCameraListener implements CameraListener {
         }
         FaceServer.getInstance().unInit();
     }
+    GetResultCallback resultCallback;
     public ARCCameraListener setRelultCallback(GetResultCallback relultCallback) {
-        arcFaceListener.setResultListener(relultCallback).setFaceHelper(faceHelper);
+        arcFaceListener.setResultListener(relultCallback);
+        this.resultCallback = relultCallback;
         return this;
     }
 }
